@@ -81,6 +81,7 @@ public class MessageIn<T>
         if (serializer instanceof MessagingService.CallbackDeterminedSerializer)
         {
             CallbackInfo callback = MessagingService.instance().getRegisteredCallback(id);
+            Monitor.instance().logMessage(id, from, verb);
             if (callback == null)
             {
                 // reply for expired callback.  we'll have to skip it.

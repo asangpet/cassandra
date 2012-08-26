@@ -37,6 +37,7 @@ import javax.management.ObjectName;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -289,6 +290,8 @@ public final class MessagingService implements MessagingServiceMBean
     // protocol versions of the other nodes in the cluster
     private final ConcurrentMap<InetAddress, Integer> versions = new NonBlockingHashMap<InetAddress, Integer>();
 
+    private static final Monitor monitor = Monitor.instance();
+    
     private static class MSHandle
     {
         public static final MessagingService instance = new MessagingService();
@@ -361,7 +364,7 @@ public final class MessagingService implements MessagingServiceMBean
             throw new RuntimeException(e);
         }
     }
-
+    
     /**
      * Track latency information for the dynamic snitch
      * @param cb the callback associated with this message -- this lets us know if it's a message type we're interested in
@@ -491,6 +494,7 @@ public final class MessagingService implements MessagingServiceMBean
     {
         String messageId = nextId();
         CallbackInfo previous;
+        monitor.addCallback(messageId, message.verb);
 
         // If HH is enabled and this is a mutation message => store the message to track for potential hints.
         if (DatabaseDescriptor.hintedHandoffEnabled() && message.verb == Verb.MUTATION)
@@ -678,7 +682,6 @@ public final class MessagingService implements MessagingServiceMBean
         if (logger.isTraceEnabled())
             logger.trace(FBUtilities.getBroadcastAddress() + " received " + message.verb
                           + " from " + id + "@" + message.from);
-
         message = SinkManager.processInboundMessage(message, id);
         if (message == null)
             return;
