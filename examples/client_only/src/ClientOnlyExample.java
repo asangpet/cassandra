@@ -147,8 +147,9 @@ public class ClientOnlyExample
     
     /**
     * This method will fail if the keyspace already exists
+     * @throws SchemaDisagreementException 
     */
-    private static void setupKeyspace(Cassandra.Iface client) throws TException, InvalidRequestException
+    private static void setupKeyspace(Cassandra.Iface client) throws TException, InvalidRequestException, SchemaDisagreementException
     {
         List<CfDef> cfDefList = new ArrayList<CfDef>();
         CfDef columnFamily = new CfDef(KEYSPACE, COLUMN_FAMILY);
@@ -156,7 +157,7 @@ public class ClientOnlyExample
 
         try 
         {
-            client.system_add_keyspace(new KsDef(KEYSPACE, "org.apache.cassandra.locator.SimpleStrategy", 1, cfDefList));
+            client.system_add_keyspace(new KsDef(KEYSPACE, "org.apache.cassandra.locator.SimpleStrategy", cfDefList));
             int magnitude = client.describe_ring(KEYSPACE).size();
             try
             {
