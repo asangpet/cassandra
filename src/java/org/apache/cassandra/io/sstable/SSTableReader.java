@@ -171,8 +171,11 @@ public class SSTableReader extends SSTable
         // In that case, we skip the check.
         String partitionerName = partitioner.getClass().getCanonicalName();
         if (sstableMetadata.partitioner != null && !partitionerName.equals(sstableMetadata.partitioner))
-            throw new RuntimeException(String.format("Cannot open %s because partitioner does not match %s",
-                                                     descriptor, partitionerName));
+        {
+            logger.warn("Changing paritioner on a existing cluster can cause data loose, Please verify your partitioner in cassandra.yaml");
+            logger.error(String.format("Cannot open %s because partitioner does not match %s != %s",descriptor, sstableMetadata.partitioner, partitionerName));
+            System.exit(1);
+        }
 
         SSTableReader sstable = new SSTableReader(descriptor,
                                                   components,

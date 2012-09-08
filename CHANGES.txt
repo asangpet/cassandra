@@ -1,4 +1,7 @@
 1.2-dev
+ * new metrics (CASSANDRA-4009)
+ * redesign KEYS indexes to avoid read-before-write (CASSANDRA-2897)
+ * debug tracing (CASSANDRA-1123)
  * parallelize row cache loading (CASSANDRA-4282)
  * Make compaction, flush JBOD-aware (CASSANDRA-4292)
  * run local range scans on the read stage (CASSANDRA-3687)
@@ -45,9 +48,12 @@
 
 
 1.1.5
+ * avoid recursion in leveled compaction (CASSANDRA-4587)
  * increase stack size under Java7 to 180K
  * Log(info) schema changes (CASSANDRA-4547)
  * Change nodetool setcachecapcity to manipulate global caches (CASSANDRA-4563)
+Merged from 1.0:
+ * fix toString of hint destination tokens (CASSANDRA-4568)
 
 
 1.1.4

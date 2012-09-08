@@ -71,6 +71,7 @@ public class DatabaseDescriptor
 
     /* Hashing strategy Random or OPHF */
     private static IPartitioner<?> partitioner;
+    private static String paritionerName;
 
     private static Config.DiskAccessMode indexAccessMode;
 
@@ -224,6 +225,7 @@ public class DatabaseDescriptor
             {
                 throw new ConfigurationException("Invalid partitioner class " + conf.partitioner);
             }
+            paritionerName = partitioner.getClass().getCanonicalName();
 
             /* phi convict threshold for FailureDetector */
             if (conf.phi_convict_threshold < 5 || conf.phi_convict_threshold > 16)
@@ -458,11 +460,13 @@ public class DatabaseDescriptor
             rowCacheProvider = FBUtilities.newCacheProvider(conf.row_cache_provider);
 
             // Hardcoded system tables
-            KSMetaData systemMeta = KSMetaData.systemKeyspace();
-            for (CFMetaData cfm : systemMeta.cfMetaData().values())
-                Schema.instance.load(cfm);
-
-            Schema.instance.addSystemTable(systemMeta);
+            List<KSMetaData> systemKeyspaces = Arrays.asList(KSMetaData.systemKeyspace(), KSMetaData.traceKeyspace());
+            for (KSMetaData ksmd : systemKeyspaces)
+            {
+                for (CFMetaData cfm : ksmd.cfMetaData().values())
+                    Schema.instance.load(cfm);
+                Schema.instance.setTableDefinition(ksmd);
+            }
 
             /* Load the seeds for node contact points */
             if (conf.seed_provider == null)
@@ -638,6 +642,11 @@ public class DatabaseDescriptor
     public static IPartitioner<?> getPartitioner()
     {
         return partitioner;
+    }
+
+    public static String getPartitionerName()
+    {
+        return paritionerName;
     }
 
     /* For tests ONLY, don't use otherwise or all hell will break loose */
